@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Rate Sponsor{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="display-4 mb-4">Rate Sponsor: {{ rated_user.username }}</h1>
+
+    <form method="POST" action="{{ url_for('influencer.rate_sponsor', sponsor_id=rated_user.id) }}">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.rating.label(class="form-control-label") }}
+            {{ form.rating(class="form-control") }}
+            {% if form.rating.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.rating.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.comment.label(class="form-control-label") }}
+            {{ form.comment(class="form-control") }}
+        </div>
+
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'influencer/base.html' %}
+
+{% block title %}View Ad Request{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="display-4 mb-4">Ad Request Details</h1>
+    <p class="lead">From: {{ ad_request.campaign.sponsor.username }}</p>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Campaign: {{ ad_request.campaign.name }}</h5>
+            <p class="card-text"><strong>Requirements:</strong> {{ ad_request.requirements }}</p>
+            <p class="card-text"><strong>Payment:</strong> ${{ ad_request.payment_amount }}</p>
+            <p class="card-text"><strong>Status:</strong> {{ ad_request.status }}</p>
+        </div>
+    </div>
+
+    {% if ad_request.status == 'pending' %}
+        <form method="POST" action="{{ url_for('influencer.view_ad_request', ad_request_id=ad_request.id) }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group mt-3">
+                {{ form.status.label(class="form-control-label") }}
+                {{ form.status(class="form-control") }}
+            </div>
+            <div class="form-group {% if form.status.data != 'negotiate' %}d-none{% endif %}" id="counter-offer-field">
+                {{ form.counter_offer.label(class="form-control-label") }}
+                {{ form.counter_offer(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Response</button>
+        </form>
+
+        <script>
+            document.getElementById('status').addEventListener('change', function() {
+                if (this.value === 'negotiate') {
+                    document.getElementById('counter-offer-field').classList.remove('d-none');
+                } else {
+                    document.getElementById('counter-offer-field').classList.add('d-none');
+                }
+            });
+        </script>
+
+    {% elif ad_request.status == 'accepted' and not ad_request.rating %}
+        <h3 class="mt-4">Rate Sponsor</h3>
+        <form method="POST" action="{{ url_for('influencer.rate_sponsor', sponsor_id=ad_request.campaign.sponsor_id) }}">
+            {{ rating_form.hidden_tag() }}
+            <div class="form-group">
+                {{ rating_form.rating.label }}
+                {{ rating_form.rating(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ rating_form.comment.label }}
+                {{ rating_form.comment(class="form-control") }}
+            </div>
+            {{ rating_form.submit(class="btn btn-primary") }}
+        </form>
+    {% endif %}
+
+    <h3 class="mt-4">Messages</h3>
+    <div class="list-group">
+        {% for message in ad_request.messages %}
+            <div class="list-group-item">
+                <p class="mb-1"><strong>{{ message.sender.username }} ({{ message.sender.role }}):</strong></p>
+                <p>{{ message.content }}</p>
+                <small class="text-muted">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('influencer.ad_requests') }}" class="btn btn-secondary mt-3">Back to Ad Requests</a>
+</div>
+
+{% endblock %}
